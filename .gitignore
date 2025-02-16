@@ -1,0 +1,23 @@
+node_modules/
+npm-debug.log
+yarn-error.log
+.env
+.DS_Store
+/dist
+/build
+/logs
+*.log
+logs
+pids
+*.pid
+*.seed
+*.pid.lock
+coverage/
+.nyc_output/
+tmp/
+
+# Editor e sistema operacional
+.vscode/
+.idea/
+*.swp
+Thumbs.db
