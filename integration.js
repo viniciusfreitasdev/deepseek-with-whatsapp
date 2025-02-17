@@ -8,9 +8,40 @@ const deepPrompt = 'Responda de forma natural e amigável, mantendo o contexto d
 // Object to store conversation history
 let history = {}
 
+// String that controls the qrcode code
+let qrCodeData = '';
+
+// Initialize the WhatsApp client
+const client = new Client({
+  authStrategy: new LocalAuth() // Saves the session locally
+});
+
+// WhatsApp Web - Instantiating the qrcode
+client.on('qr', (qr) => { qrCodeData = qr; })
+
+// WhatsApp Web - Client is ready to be called
+client.on('ready', () => { console.log('Client is ready!'); });
+
+// WhatsApp Web - 
+client.on('message', (message) => {
+  console.log(`Message received from ${ message.from }: ${ message.body } `);
+
+  const response = '';
+
+  // Reply to the message on WhatsApp
+  // message.reply(response);
+});
+
+// WhatsApp Web - Starting the client
+client.initialize();
+
 // Function - Return QRCode for WhastApp
 exports.returnqr = async (req, res) => {
   try {
+    
+
+
+
     res.send('Return QRCode is working!');
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -43,3 +74,6 @@ exports.viewHistory = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+
+// ProcessMensage
