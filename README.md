@@ -111,5 +111,5 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Acknowledgments
 
-- [WhatsApp Web API]([https://github.com/viniciusfreitasdev/deepseek-with-whatsapp.git](https://docs.wwebjs.dev/index.html)
+- [WhatsApp Web API](https://docs.wwebjs.dev/index.html)
 - [DeepSeek Model](https://www.deepseek.com/)
