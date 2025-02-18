@@ -29,7 +29,7 @@ This project aims to implement a functionality test using ExpressJS and a locall
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/yourusername/whatsapp-auto-response.git
+   git clone https://github.com/viniciusfreitasdev/deepseek-with-whatsapp.git
    cd whatsapp-auto-response
    ```
 
