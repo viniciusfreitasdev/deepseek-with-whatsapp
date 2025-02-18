@@ -15,6 +15,7 @@ pids
 coverage/
 .nyc_output/
 tmp/
+.wwebjs_auth
 
 # Editor e sistema operacional
 .vscode/
