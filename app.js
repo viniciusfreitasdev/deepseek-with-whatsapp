@@ -1,6 +1,24 @@
 const express = require('express');
-const app = express()
-const port = 3000
+const fs = require('fs');
+const app = express();
+require('dotenv').config(); // Loads the variables from the .env file
+
+const port = process.env.PORT || 3000;;
+const pathsDelete = ['./.wwebjs_auth', './.wwebjs_cache']; // Path of folders to be excluded
+
+// Function to delete folder recursively
+const deleteFolders = (paths) => {
+  paths.forEach(folderPath => {
+    if (fs.existsSync(folderPath)) {
+      fs.rmSync(folderPath, { recursive: true, force: true });
+      console.log(`${folderPath} Test folder deleted successfully!`);
+    }
+  });
+};
+
+// Exclude folder when starting script
+deleteFolders(pathsDelete);
+
 
 // Calling the integraton.js file
 const integration = require('./integration');
@@ -24,7 +42,7 @@ app.post('/api/viewHistory', (req, res) => {
 });
 
 // API - Return QRCode for WhastApp
-app.post('/api/returnqr', async (req, res) => {
+app.get('/api/returnqr', async (req, res) => {
   const data = await integration.returnqr(req, res);
   res.json(data);
 });
@@ -37,7 +55,7 @@ app.post('/api/historyView', async (req, res) => {
 
 // API - Message request per user
 app.post('/api/messagePerUser', async (req, res) => {
-  const data = await integration.messagePerUser(req, res);
+  const data = await integration.messagePerUser(req, res, true);
   res.json(data);
 });
 
@@ -53,4 +71,4 @@ app.post('/api/clearAllUser', async (req, res) => {
   res.json(data);
 });
 
-app.listen(port, () => console.log(`deepseek-with-whatsapp listening on http://localhost:${port}/ `))
+app.listen(port, () =>  { console.log(`deepseek-with-whatsapp listening on http://localhost:${port}/ `)})

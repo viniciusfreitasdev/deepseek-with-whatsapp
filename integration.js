@@ -1,6 +1,7 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode');
 const axios  = require('axios');
+require('dotenv').config(); // Loads the variables from the .env file
 
 // Deep prompt for entire application
 const deepPrompt = 'Responda de forma natural e amigável, mantendo o contexto da conversa.'
@@ -12,7 +13,7 @@ let history = {}
 let lastPrompt = {}
 
 // String that controls the qrcode code
-let qrCodeData = '';
+let dataQrcode = '';
 
 // Initialize the WhatsApp client
 const client = new Client({
@@ -20,20 +21,40 @@ const client = new Client({
 });
 
 // WhatsApp Web - Instantiating the qrcode
-client.on('qr', (qr) => { qrCodeData = qr; })
+client.on('qr', (qr) => { 
+  dataQrcode = qr;
+  console.log('Client is ready :>> ', qr);
+})
 
 // WhatsApp Web - Client is ready to be called
 client.on('ready', () => { console.log('Client is ready!'); });
 
-// WhatsApp Web - 
-client.on('message', (message) => {
-  console.log(`Message received from ${ message.from }: ${ message.body } `);
+// WhatsApp Web - Captures sent and received messages
+// client.on('message', (message) => { -> Capture only incoming messages
+client.on('message_create', async (message) => {
 
-  const response = '';
+  // I added this if statement for testing purposes, to receive only messages from you in a specific WhatsApp group.
+  if(
+      message.fromMe
+    & message.to == process.env.messageTo
+    & message.from == process.env.messageFrom
+    & !message.body.startsWith("AI Assistant:")
+  ) {
+    console.log(`Message received from ${ message.from }: ${ message.body } `);
 
-  // Reply to the message on WhatsApp
-  // message.reply(response);
+    const response = await this.messagePerUser(message.from, message.body, false) ;
+
+    // Reply to the message on WhatsApp ( in test )
+    message.reply(response);
+  }
 });
+
+// WhatsApp Web - 
+client.on('disconnected', (reason) => {
+  console.log('Client disconnected! Reason:', reason);
+  client.initialize();
+});
+
 
 // WhatsApp Web - Starting the client
 client.initialize();
@@ -41,11 +62,11 @@ client.initialize();
 // Function - Return QRCode for WhastApp
 exports.returnqr = async (req, res) => {
   try {
-    
 
+    const qrCodeImage = await qrcode.toBuffer(dataQrcode, { type: 'png' })
+    res.setHeader('Content-Type', 'image/png');
+    res.send(qrCodeImage)
 
-
-    res.send('Return QRCode is working!');
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -117,11 +138,11 @@ exports.clearAllUser = async (req, res) => {
 }
 
 // Function - Message request per user (API e WhatsApp Message)
-exports.messagePerUser = async (req, res) => {
+exports.messagePerUser = async (req, res, typeRequest) => {
   try {
 
-    const userId = req.body.user;        // User by request
-    const promptUser = req.body.prompt;  // User prompt
+    const userId     = typeRequest ? req.body.user   : req;  // User by request
+    const promptUser = typeRequest ? req.body.prompt : res;  // User prompt
   
     if (!history[userId]) { history[userId] = [] }        // Creates the user's history space if it does not exist
     if (!lastPrompt[userId]) { lastPrompt[userId] = [] }  // Creates the user's last prompt space if it does not exist
@@ -147,34 +168,9 @@ exports.messagePerUser = async (req, res) => {
 
     history[userId].push({ role: 'assistant', content: reply }); // Save AI response in history
   
-    return reply; // Function response
+    return `AI Assistant: ${reply}`; // Function response
 
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 }
-
-
-// ProcessMensage
-
-// {
-//   "1": [
-//     { "role": "user", "message": "Olá!" },
-//     { "role": "assist", "message": "Oi! Como posso ajudar?" }
-//   ]
-// }
-
-// curl http://localhost:1234/v1/chat/completions \
-//   -H "Content-Type: application/json" \
-//   -d '{
-//     "model": "deepseek-r1-distill-llama-8b",
-//     "messages": [
-//       { "role": "system", "content": "Always answer in rhymes. Today is Thursday" },
-//       { "role": "user", "content": "What day is it today?" }
-//     ],
-//     "temperature": 0.7,
-//     "max_tokens": -1,
-//     "stream": false
-// }'
-
-// "<think>\nAlright, the user greeted me with \"Olá, como vocÊ está?\" which means \"Hello, how are you?\" in Portuguese. I should respond in a friendly and natural manner, maintaining the conversation flow.\n\nI'll start by acknowledging their greeting to keep it polite. Then, I can express that I'm doing well and ask how they are. It's important to use appropriate Portuguese phrases here, like \"em que estado você está?\" which means \"How are you?\"\n\nAlso, I should consider if there's more context needed or if the user just wanted a simple response. Since it's a greeting, a brief and warm reply should suffice.\n\nI might add an emoji to keep it friendly, but not overdo it. Finally, I'll make sure my Portuguese is correct and natural-sounding.\n</think>\n\nOlá! Estou bem, obrigado. Como você está?"
